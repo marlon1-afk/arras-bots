@@ -6,6 +6,9 @@ on:
 jobs:
   run-bots:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "arras_bots_setup (2)/arras_bots_setup"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
