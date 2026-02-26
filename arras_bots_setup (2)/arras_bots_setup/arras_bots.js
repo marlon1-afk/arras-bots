@@ -732,10 +732,22 @@ WScript.Echo strOutput
     if (process.env.GITHUB_ACTIONS) {
         console.log("[*] GitHub Actions automatically triggering spawn in 5 seconds...");
         setTimeout(() => {
-            controllerPage.evaluate(() => {
-                document.getElementById('spawn-btn').click();
-            }).catch(e => console.error("Auto-spawn failed:", e));
+            const githubConfig = {
+                url: process.env.TARGET_URL || "https://arras.io/",
+                bots: parseInt(process.env.BOT_COUNT) || 10,
+                concurrency: parseInt(process.env.CONCURRENCY) || 3,
+                headless: true,
+                useProxies: false,
+                botName: process.env.BOT_NAME || "GitHub_Afk",
+                respawnDelay: 5
+            };
+            // Directly trigger spawn to avoid UI issues
+            controllerPage.evaluate((cfg) => window.triggerSpawn(cfg), githubConfig)
+                .catch(e => console.error("Auto-spawn failed:", e));
         }, 5000);
+
+        // Keep the process alive indefinitely
+        setInterval(() => { }, 1000000);
     }
 }
 
