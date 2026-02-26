@@ -431,7 +431,7 @@ async function main() {
 
     const profilePath = path.join(os.tmpdir(), 'arras_ui_' + Date.now());
     const controllerCtx = await chromium.launchPersistentContext(profilePath, {
-        headless: false,
+        headless: process.env.GITHUB_ACTIONS ? true : false,
         noViewport: true,
         args: [
             '--app=data:text/html,<html><head><title>Arras Bots</title></head><body style="background:#0a0a12;"></body></html>',
@@ -612,7 +612,7 @@ WScript.Echo strOutput
 
             if (!browser || !browser.isConnected()) {
                 browser = await chromium.launch({
-                    headless: headless,
+                    headless: process.env.GITHUB_ACTIONS ? true : headless,
                     args: [
                         "--disable-blink-features=AutomationControlled",
                         "--no-sandbox",
@@ -722,6 +722,16 @@ WScript.Echo strOutput
     });
 
     await controllerPage.setContent(htmlContent);
+
+    // If running in GitHub Actions, automatically trigger the spawn since we can't click the UI
+    if (process.env.GITHUB_ACTIONS) {
+        console.log("[*] GitHub Actions automatically triggering spawn in 5 seconds...");
+        setTimeout(() => {
+            controllerPage.evaluate(() => {
+                document.getElementById('spawn-btn').click();
+            }).catch(e => console.error("Auto-spawn failed:", e));
+        }, 5000);
+    }
 }
 
 main().catch(e => {
