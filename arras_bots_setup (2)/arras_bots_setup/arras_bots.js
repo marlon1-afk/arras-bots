@@ -430,16 +430,21 @@ async function main() {
     console.log("[*] Opening Interface...");
 
     const profilePath = path.join(os.tmpdir(), 'arras_ui_' + Date.now());
-    const controllerCtx = await chromium.launchPersistentContext(profilePath, {
-        headless: process.env.GITHUB_ACTIONS ? true : false,
-        noViewport: true,
-        args: [
-            '--app=data:text/html,<html><head><title>Arras Bots</title></head><body style="background:#0a0a12;"></body></html>',
-            '--window-size=310,500',
-            '--enable-transparent-titlebar',
-            '--transparent-title-bar'
-        ]
-    });
+    let controllerCtx;
+    try {
+        controllerCtx = await chromium.launchPersistentContext(profilePath, {
+            headless: !!process.env.GITHUB_ACTIONS, // Use headless if on GitHub Actions
+            noViewport: true,
+            args: [
+                '--app=data:text/html,<html><head><title>Arras Bots</title></head><body style="background:#0a0a12;"></body></html>',
+                '--window-size=310,500',
+                ...(process.env.GITHUB_ACTIONS ? [] : ['--enable-transparent-titlebar', '--transparent-title-bar'])
+            ]
+        });
+    } catch (err) {
+        console.error("Failed to launch UI context:", err);
+        process.exit(1);
+    }
 
     await controllerCtx.grantPermissions(['clipboard-read', 'clipboard-write']);
     const controllerPage = controllerCtx.pages().length > 0
