@@ -6,14 +6,16 @@ on:
 jobs:
   run-bots:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: "arras_bots_setup (2)/arras_bots_setup"
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: npm install
-      - run: npx playwright install --with-deps chromium
-      - run: node arras_bots.js
+
+      - name: Setup und Start
+        run: |
+          cd "arras_bots_setup (2)/arras_bots_setup"
+          npm install
+          npx playwright install --with-deps chromium
+          node arras_bots.js
