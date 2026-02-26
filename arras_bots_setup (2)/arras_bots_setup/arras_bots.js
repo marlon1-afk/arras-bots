@@ -605,6 +605,7 @@ WScript.Echo strOutput
     // ── Exposed: spawn ────────────────────────────────────────────────────────
     await controllerPage.exposeFunction('triggerSpawn', async (config) => {
         try {
+            console.log(`[*] triggerSpawn called with config:`, config);
             currentConfig = config;
             const { url, bots, concurrency, headless } = config;
 
@@ -665,9 +666,12 @@ WScript.Echo strOutput
             }
 
             const indices = Array.from({ length: bots }, (_, i) => i);
+            console.log(`[*] Starting loop to spawn ${bots} bots in chunks of ${concurrency}...`);
             for (let i = 0; i < bots; i += concurrency) {
                 const chunk = indices.slice(i, i + concurrency);
+                console.log(`[*] Spawning chunk: ${chunk.join(', ')}`);
                 await Promise.all(chunk.map(launchOne));
+                console.log(`[*] Chunk ${chunk.join(', ')} complete.`);
                 // Minimal break between chunks to keep the browser responsive
                 await new Promise(r => setTimeout(r, 500));
             }
@@ -741,9 +745,15 @@ WScript.Echo strOutput
                 botName: process.env.BOT_NAME || "GitHub_Afk",
                 respawnDelay: 5
             };
+            console.log("[*] Dispatching spawn config:", githubConfig);
             // Directly trigger spawn to avoid UI issues
-            controllerPage.evaluate((cfg) => window.triggerSpawn(cfg), githubConfig)
-                .catch(e => console.error("Auto-spawn failed:", e));
+            controllerPage.evaluate(async (cfg) => {
+                if (window.triggerSpawn) {
+                    await window.triggerSpawn(cfg);
+                } else {
+                    console.error("window.triggerSpawn is not defined in the page");
+                }
+            }, githubConfig).catch(e => console.error("Auto-spawn evaluate failed:", e));
         }, 5000);
 
         // Keep the process alive indefinitely
