@@ -6,6 +6,11 @@ on:
 jobs:
   run-bots:
     runs-on: ubuntu-latest
+    env:
+      TARGET_URL: 'https://arras.io/'
+      BOT_NAME: 'GitHub_Afk'
+      BOT_COUNT: 10
+      CONCURRENCY: 3
     steps:
       - name: Lade den Code herunter
         uses: actions/checkout@v4
