@@ -1,21 +1,24 @@
 name: Run Arras Bots
 
-on: 
+on:
   workflow_dispatch:
 
 jobs:
   run-bots:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - name: Lade den Code herunter
+        uses: actions/checkout@v4
+        
+      - name: Installiere Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
-
+          
       - name: Setup und Start
         run: |
           cd "arras_bots_setup (2)/arras_bots_setup"
           npm install
           npx playwright install --with-deps chromium
-          node arras_bots.js
+          sudo apt-get update && sudo apt-get install -y xvfb
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" node arras_bots.js
