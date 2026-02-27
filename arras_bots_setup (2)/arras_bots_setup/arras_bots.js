@@ -648,6 +648,8 @@ WScript.Echo strOutput
                     const botEntry = { ctx, page, watcherActive: false };
                     activeBotCtxs.push(botEntry);
 
+                    console.log(`[+] Bot ${i + 1} verbunden und im Spiel!`);
+
                     // Signal UI immediately after trying to join
                     await controllerPage.evaluate(({ i, total }) => {
                         if (window.onBotReady) window.onBotReady(i, total);
